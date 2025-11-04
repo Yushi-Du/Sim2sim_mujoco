@@ -72,7 +72,8 @@ LOG_DATA = False
 USE_GRIPPPER = False
 NO_MOTOR = False
 
-HUMANOID_XML = "/home/yushidu/Documents/Humanoid_robot_deployment/sim2sim/assets/robots/g1/scene_29dof.xml"
+HUMANOID_XML = "/home/yushidu/Documents/Humanoid_robot_deployment/sim2sim/assets/robots/g1/scene_29dof_with_object.xml"
+# HUMANOID_XML = "/home/yushidu/Documents/Humanoid_robot_deployment/sim2sim/assets/robots/g1/scene_29dof.xml"
 # HUMANOID_XML = "/home/yushidu/Documents/Mujoco/unitree_mujoco/unitree_robots/g1/scene_29dof.xml"
 DEBUG = True
 SIM = True
@@ -114,7 +115,7 @@ class G1():
         self.num_observations = 111
         self.num_actions = 29
         self.num_privileged_obs = None
-        self.obs_context_len=10
+        self.obs_context_len=25
         
         self.scale_lin_vel = 2.0
         self.scale_ang_vel = 0.25
@@ -153,45 +154,45 @@ class G1():
         # self.p_gains = np.array([hip_pitch_pgain,hip_pgain,hip_pgain,knee_pgain,ankle_pgain,ankle_pgain,hip_pitch_pgain,hip_pgain,hip_pgain,knee_pgain,ankle_pgain,ankle_pgain,waist_pgain,waist_pgain,waist_pgain,shoulder_pgain,shoulder_pgain,shoulder_pgain,elbow_pgain,wrist_roll_pgain,wrist_pitch_pgain,wrist_yaw_pgain,shoulder_pgain,shoulder_pgain,shoulder_pgain,elbow_pgain,wrist_roll_pgain,wrist_pitch_pgain,wrist_yaw_pgain])
         # self.d_gains = np.array([hip_pitch_dgain,hip_dgain,hip_dgain,knee_dgain,ankle_dgain,ankle_dgain,hip_pitch_dgain,hip_dgain,hip_dgain,knee_dgain,ankle_dgain,ankle_dgain,waist_dgain,waist_dgain,waist_dgain,shoulder_dgain,shoulder_dgain,shoulder_dgain,elbow_dgain,wrist_roll_dgain,wrist_pitch_dgain,wrist_yaw_dgain,shoulder_dgain,shoulder_dgain,shoulder_dgain,elbow_dgain,wrist_roll_dgain,wrist_pitch_dgain,wrist_yaw_dgain])
         
-        # self.p_gains = np.array([
-        #     80., 80., 80., 160., 20., 20., 80., 80., 80., 160., 20., 20., 200., 200., 200.,
-        #     40., 40., 40., 40., 40., 40., 40., 40., 40., 40., 40., 40., 40., 40.
-        # ])
-        # self.d_gains = np.array([
-        #     2., 2., 2., 4., 0.5, 0.5, 2., 2., 2., 4., 0.5, 0.5, 5., 5., 5.,
-        #     1., 1., 1., 1., 0.5, 0.5, 0.5, 1., 1., 1., 1., 0.5, 0.5, 0.5
-        # ])
+        self.p_gains = np.array([
+            80., 80., 80., 160., 20., 20., 80., 80., 80., 160., 20., 20., 200., 200., 200.,
+            40., 40., 40., 40., 40., 40., 40., 40., 40., 40., 40., 40., 40., 40.
+        ])
+        self.d_gains = np.array([
+            2., 2., 2., 4., 0.5, 0.5, 2., 2., 2., 4., 0.5, 0.5, 5., 5., 5.,
+            1., 1., 1., 1., 0.5, 0.5, 0.5, 1., 1., 1., 1., 0.5, 0.5, 0.5
+        ])
 
         self.mujoco2policy_action = [0, 6, 12, 1, 7, 13, 2, 8, 14, 3, 9, 15, 22, 4, 10, 16, 23, 5, 11, 17, 24, 18, 25, 19, 26, 20, 27, 21, 28]
         self.policy2mujoco_action = [ 0,  3,  6,  9, 13, 17,  1,  4,  7, 10, 14, 18,  2,  5,  8, 11, 15, 19, 21, 23, 25, 27, 12, 16, 20, 22, 24, 26, 28]
 
-        # 9_1: kpkd from beyondmimic
-        # self.p_gains = np.array([40.1792, 40.1792, 40.1792, 99.0984, 99.0984, 28.5012, 40.1792, 40.1792,
-        #     28.5012, 99.0984, 99.0984, 14.2506, 14.2506, 28.5012, 28.5012, 14.2506,
-        #     14.2506, 28.5012, 28.5012, 14.2506, 14.2506, 14.2506, 14.2506, 14.2506,
-        #     14.2506, 16.7783, 16.7783, 16.7783, 16.7783])
-        self.p_gains = np.array([40.1792, 99.0984, 40.1792, 99.0984, 28.5012, 28.5012, 40.1792,
-            99.0984, 40.1792, 99.0984, 28.5012, 28.5012, 40.1792, 28.5012,
-            28.5012, 14.2506, 14.2506, 14.2506, 14.2506, 14.2506, 16.7783,
-            16.7783, 14.2506, 14.2506, 14.2506, 14.2506, 14.2506, 16.7783,
-            16.7783])
-        # self.p_gains = self.p_gains[self.policy2mujoco_action]
+        # # 9_1: kpkd from beyondmimic
+        # # self.p_gains = np.array([40.1792, 40.1792, 40.1792, 99.0984, 99.0984, 28.5012, 40.1792, 40.1792,
+        # #     28.5012, 99.0984, 99.0984, 14.2506, 14.2506, 28.5012, 28.5012, 14.2506,
+        # #     14.2506, 28.5012, 28.5012, 14.2506, 14.2506, 14.2506, 14.2506, 14.2506,
+        # #     14.2506, 16.7783, 16.7783, 16.7783, 16.7783])
+        # self.p_gains = np.array([40.1792, 99.0984, 40.1792, 99.0984, 28.5012, 28.5012, 40.1792,
+        #     99.0984, 40.1792, 99.0984, 28.5012, 28.5012, 40.1792, 28.5012,
+        #     28.5012, 14.2506, 14.2506, 14.2506, 14.2506, 14.2506, 16.7783,
+        #     16.7783, 14.2506, 14.2506, 14.2506, 14.2506, 14.2506, 16.7783,
+        #     16.7783])
+        # # self.p_gains = self.p_gains[self.policy2mujoco_action]
 
-        # self.d_gains = np.array([2.5579, 2.5579, 2.5579, 6.3088, 6.3088, 1.8144, 2.5579, 2.5579, 1.8144,
-        #     6.3088, 6.3088, 0.9072, 0.9072, 1.8144, 1.8144, 0.9072, 0.9072, 1.8144,
-        #     1.8144, 0.9072, 0.9072, 0.9072, 0.9072, 0.9072, 0.9072, 1.0681, 1.0681,
-        #     1.0681, 1.0681])
-        # self.d_gains = self.d_gains[self.policy2mujoco_action]
-        self.d_gains = np.array([2.5579, 6.3088, 2.5579, 6.3088, 1.8144, 1.8144, 2.5579, 6.3088,
-            2.5579, 6.3088, 1.8144, 1.8144, 2.5579, 1.8144, 1.8144, 0.9072,
-            0.9072, 0.9072, 0.9072, 0.9072, 1.0681, 1.0681, 0.9072, 0.9072,
-            0.9072, 0.9072, 0.9072, 1.0681, 1.0681])
+        # # self.d_gains = np.array([2.5579, 2.5579, 2.5579, 6.3088, 6.3088, 1.8144, 2.5579, 2.5579, 1.8144,
+        # #     6.3088, 6.3088, 0.9072, 0.9072, 1.8144, 1.8144, 0.9072, 0.9072, 1.8144,
+        # #     1.8144, 0.9072, 0.9072, 0.9072, 0.9072, 0.9072, 0.9072, 1.0681, 1.0681,
+        # #     1.0681, 1.0681])
+        # # self.d_gains = self.d_gains[self.policy2mujoco_action]
+        # self.d_gains = np.array([2.5579, 6.3088, 2.5579, 6.3088, 1.8144, 1.8144, 2.5579, 6.3088,
+        #     2.5579, 6.3088, 1.8144, 1.8144, 2.5579, 1.8144, 1.8144, 0.9072,
+        #     0.9072, 0.9072, 0.9072, 0.9072, 1.0681, 1.0681, 0.9072, 0.9072,
+        #     0.9072, 0.9072, 0.9072, 1.0681, 1.0681])
 
-        self.armature = np.array([0.0102, 0.0102, 0.0102, 0.0251, 0.0251, 0.0072, 0.0102, 0.0102, 0.0072,
-            0.0251, 0.0251, 0.0036, 0.0036, 0.0072, 0.0072, 0.0036, 0.0036, 0.0072,
-            0.0072, 0.0036, 0.0036, 0.0036, 0.0036, 0.0036, 0.0036, 0.0043, 0.0043,
-            0.0043, 0.0043])
-        self.armature = self.armature[self.policy2mujoco_action]
+        # self.armature = np.array([0.0102, 0.0102, 0.0102, 0.0251, 0.0251, 0.0072, 0.0102, 0.0102, 0.0072,
+        #     0.0251, 0.0251, 0.0036, 0.0036, 0.0072, 0.0072, 0.0036, 0.0036, 0.0072,
+        #     0.0072, 0.0036, 0.0036, 0.0036, 0.0036, 0.0036, 0.0036, 0.0043, 0.0043,
+        #     0.0043, 0.0043])
+        # self.armature = self.armature[self.policy2mujoco_action]
         
         # [[[-2.5307,  2.8798],
         #  [-2.5307,  2.8798],
@@ -237,38 +238,6 @@ class G1():
         
         self.default_dof_pos_np = np.zeros(29)
         
-        # self.default_dof_pos_np[:29] = np.array([
-        #                                     -0.2, #left hip pitch
-        #                                     0.0, #left hip roll
-        #                                     0.0, #left hip pitch
-        #                                     0.42, #left knee
-        #                                     -0.23, #left ankle pitch 
-        #                                     0, #left ankle roll 
-        #                                     -0.2, #right hip pitch
-        #                                     0.0, #right hip roll
-        #                                     0.0, #right hip pitch
-        #                                     0.42, #right knee
-        #                                     -0.23, #right ankle pitch 
-        #                                     0, #right ankle roll 
-        #                                     0, #waist
-        #                                     0, #waist
-        #                                     0, #waist
-        #                                     0.,
-        #                                     0.18,
-        #                                     0.,
-        #                                     0.,
-        #                                     -1.57,
-        #                                     0.,
-        #                                     0.,
-        #                                     0.,
-        #                                     -0.18,
-        #                                     0.,
-        #                                     0.,
-        #                                     1.57,
-        #                                     0.,
-        #                                     0.,
-        #                                     ])
-        
         self.default_dof_pos_np[:29] = np.array([
                                             -0.2, #left hip pitch
                                             0.0, #left hip roll
@@ -285,21 +254,55 @@ class G1():
                                             0, #waist
                                             0, #waist
                                             0, #waist
-                                            0.12,
-                                            0.8,
+                                            0.,
+                                            0.18,
                                             0.,
                                             0.,
-                                            -0.25,
-                                            1.4,
-                                            -0.5,
-                                            0.12,
-                                            -0.8,
+                                            0.,
+                                            # -1.57,
                                             0.,
                                             0.,
-                                            0.25,
-                                            1.4,
-                                            0.5,
+                                            0.,
+                                            -0.18,
+                                            0.,
+                                            0.,
+                                            0.,
+                                            # 1.57,
+                                            0.,
+                                            0.,
                                             ])
+        
+        # self.default_dof_pos_np[:29] = np.array([
+        #                                     -0.2, #left hip pitch
+        #                                     0.0, #left hip roll
+        #                                     0.0, #left hip pitch
+        #                                     0.42, #left knee
+        #                                     -0.23, #left ankle pitch 
+        #                                     0, #left ankle roll 
+        #                                     -0.2, #right hip pitch
+        #                                     0.0, #right hip roll
+        #                                     0.0, #right hip pitch
+        #                                     0.42, #right knee
+        #                                     -0.23, #right ankle pitch 
+        #                                     0, #right ankle roll 
+        #                                     0, #waist
+        #                                     0, #waist
+        #                                     0, #waist
+        #                                     0.12,
+        #                                     0.8,
+        #                                     0.,
+        #                                     0.,
+        #                                     -0.25,
+        #                                     1.4,
+        #                                     -0.5,
+        #                                     0.12,
+        #                                     -0.8,
+        #                                     0.,
+        #                                     0.,
+        #                                     0.25,
+        #                                     1.4,
+        #                                     0.5,
+        #                                     ])
         
         default_dof_pos = torch.tensor(self.default_dof_pos_np, dtype=torch.float, device=self.device, requires_grad=False)
         self.default_dof_pos = default_dof_pos.unsqueeze(0)
@@ -321,7 +324,7 @@ class G1():
         self.mj_model.dof_damping[:] = 1.0
         self.mj_model.dof_armature[:] = 0.01
 
-        self.mj_model.dof_armature[0:29] = self.armature
+        # self.mj_model.dof_armature[0:29] = self.armature
         # self.mj_model.dof_armature[17] = 0.1
         # self.mj_model.dof_armature[18] = 0.1
         # self.mj_model.dof_armature[24] = 0.1
@@ -514,10 +517,15 @@ class DeployNode():
         # self.policy = torch.jit.load("/home/yushidu/Documents/Humanoid/IsaacLab/actor_8_24_no_orientation.pt", map_location=self.env.device)
         # self.policy = torch.jit.load("/home/yushidu/Documents/Humanoid/IsaacLab/student_8_26_distill.pt", map_location=self.env.device)
         # self.policy = torch.jit.load("/home/yushidu/Documents/Humanoid/IsaacLab/actor_8_28_more_slope.pt", map_location=self.env.device)
+        # self.policy = torch.jit.load("/home/yushidu/Documents/Humanoid/IsaacLab/student_10_10.pt", map_location=self.env.device)
+        # self.policy = torch.jit.load("/home/yushidu/Documents/Humanoid/IsaacLab/student_10_12.pt", map_location=self.env.device)
+        # self.policy = torch.jit.load("/home/yushidu/Documents/Humanoid/IsaacLab/student_10_16.pt", map_location=self.env.device)
+        self.policy = torch.jit.load("/home/yushidu/Documents/Humanoid/IsaacLab/student_10_17_friction_terrains.pt", map_location=self.env.device)
+        # self.policy = torch.jit.load("/home/yushidu/Documents/Humanoid/IsaacLab/student_10_15_friction.pt", map_location=self.env.device)
         # self.policy = torch.jit.load("/home/yushidu/Documents/Humanoid/IsaacLab/student_8_30_distill.pt", map_location=self.env.device)
         # self.policy = torch.jit.load("/home/yushidu/Documents/Humanoid/IsaacLab/student_9_1_distill.pt", map_location=self.env.device)
         # self.policy = torch.jit.load("/home/yushidu/Documents/Humanoid/IsaacLab/student_9_1_new_kpkd.pt", map_location=self.env.device)
-        self.policy = torch.jit.load("/home/yushidu/Documents/Humanoid/IsaacLab/actor_9_5_new_kpkd_slope.pt", map_location=self.env.device)
+        # self.policy = torch.jit.load("/home/yushidu/Documents/Humanoid/IsaacLab/actor_9_5_new_kpkd_slope.pt", map_location=self.env.device)
         # self.policy = torch.jit.load("/home/yushidu/Documents/Humanoid/IsaacLab/actor_8_21_four_times.pt", map_location=self.env.device)
         # self.policy = torch.jit.load("/home/yushidu/Documents/Humanoid/IsaacLab/actor_four_times_vel_4090D.pt", map_location=self.env.device)
         self.policy.to(self.env.device)
@@ -606,8 +614,11 @@ class DeployNode():
         obs_joint_pos_policy_order += ((2*torch.rand_like(torch.tensor(obs_joint_pos_policy_order))-1)*0.01).numpy()
         obs_joint_vel_policy_order += ((2*torch.rand_like(torch.tensor(obs_joint_vel_policy_order))-1)*0.05*1.5).numpy()
 
-        obs_joint_pos_policy_order[23:29] *= 0
-        obs_joint_vel_policy_order[23:29] *= 0
+        # need to modify here
+        # obs_joint_pos_policy_order[23] += -1.5708
+        # obs_joint_pos_policy_order[24] += 1.5708
+        # obs_joint_pos_policy_order[23:29] *= 0
+        # obs_joint_vel_policy_order[23:29] *= 0
 
         obs_buf = torch.tensor(np.concatenate((
                             self.xyyaw_command, # dim 3,
@@ -731,6 +742,8 @@ class DeployNode():
             #     rclpy.spin_once(self,timeout_sec=0.005)
             # self.obs_tick = self.msg_tick
 
+            move_root_count = 0
+
             if self.start_policy:
                 if LOG_DATA:
                     self.dof_pos_hist.append(self.obs_joint_pos_)
@@ -746,9 +759,22 @@ class DeployNode():
                 # self.compute_observations()
                 self.compute_one_frame_observations()
                 self.episode_length_buf += 1
+                
+                # print(self.episode_length_buf)
+                if self.episode_length_buf % 100 == 1:
+                # if self.episode_length_buf == 1:
+                    print(self.episode_length_buf//100)
+                    vel = 0.0 + (1.2 * (-1.0) ** (self.episode_length_buf//100))
+                    move_root_count = 10
+
+                if move_root_count != 0:
+                    move_root_count -= 1
+                    # self.env.mj_data.qvel[35] = vel
+                    self.env.mj_data.qvel[0] = vel
 
                 raw_actions = self.policy(self.env.obs_buf.detach().reshape(1, -1))
-                raw_actions[:, 23:29] *= 0
+                # raw_actions[:, 23:29] *= 0
+                raw_actions[:, 23:27] *= 0
                 # if torch.any(torch.isnan(raw_actions)):
                 #     self.set_gains(np.array([0.0]*HW_DOF),self.env.d_gains)
                 #     self.set_motor_position(q=self.env.default_dof_pos_np)
