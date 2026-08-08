@@ -517,7 +517,22 @@ class DeployNode(Node):
             loop_start_time = time.monotonic()
             
             if self.Emergency_stop:
-                breakpoint()
+                # SAFETY (2026-08-05): was breakpoint() -- an interactive pdb
+                # prompt on a live robot. Halt the policy, hold the last measured
+                # pose briefly, then exit the control loop.
+                self.get_logger().error("EMERGENCY STOP: joint limit reached -- policy halted")
+                self.start_policy = False
+                try:
+                    hold_q = np.array(self.joint_pos, dtype=float)
+                    for _ in range(50):
+                        self.set_motor_position(q=hold_q)
+                        if not NO_MOTOR:
+                            self.motor_pub.publish(self.cmd_msg)
+                        time.sleep(0.01)
+                except Exception as exc:
+                    self.get_logger().error(f"emergency hold failed: {exc}")
+                self.get_logger().error("EMERGENCY STOP complete -- exiting control loop")
+                break
             if self.stop:
                 _percent_1 = 0
                 _duration_1 = 1000
@@ -610,7 +625,11 @@ class DeployNode(Node):
                             mujoco.mj_step(self.env.mj_model, self.env.mj_data)
                 current_time = self.episode_length_buf * self.dt + self.motion_start_times
                 if current_time > self._ref_motion_length:
-                    breakpoint()
+                    # reference motion exhausted -- stop cleanly rather than
+                    # dropping into pdb (2026-08-05)
+                    self.get_logger().info("reference motion finished -- stopping")
+                    self.stop = True
+                    break
                 
                 bar_length = 50
                 progress = current_time / self._ref_motion_length

@@ -741,7 +741,23 @@ class DeployNode(Node):
             loop_start_time = time.monotonic()
             
             if self.Emergency_stop:
-                breakpoint()
+                # SAFETY (2026-08-05): was breakpoint() -- an interactive pdb
+                # prompt on a live robot. Stop the policy, hold the last measured
+                # pose with damping so the robot does not collapse or keep
+                # driving into its end-stops, then exit the loop.
+                self.get_logger().error("EMERGENCY STOP: joint limit reached -- policy halted")
+                self.start_policy = False
+                try:
+                    hold_q = np.array(self.joint_pos, dtype=float)
+                    for _ in range(50):          # ~0.5 s of hold at 100 Hz
+                        self.set_motor_position(q=hold_q)
+                        if not NO_MOTOR:
+                            self.motor_pub.publish(self.cmd_msg)
+                        time.sleep(0.01)
+                except Exception as exc:          # never let cleanup mask the stop
+                    self.get_logger().error(f"emergency hold failed: {exc}")
+                self.get_logger().error("EMERGENCY STOP complete -- exiting control loop")
+                break
             if self.stop:
                 _percent_1 = 0
                 _duration_1 = 1000
